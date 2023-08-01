@@ -72,7 +72,7 @@ User.findOne({name}).then((data) => {
     });
   } else {
     if(data.password === password){
-      res.json({result: true, token: data.token});
+      res.json({result: true, token: data.token, name: name});
     } else {
       res.json({
         result: false,
@@ -92,6 +92,7 @@ router.get("/get/:token", async function(req, res) {
   const {token} = req.params;
   await User.findOne({ token }).then((data) => {
     res.json({toDo: data.toDos})
+    console.log(data.toDos)
   })
 })
 
