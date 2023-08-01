@@ -9,7 +9,9 @@ router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
-/* Sign up */
+/*------------------------------------------------------------------------*/
+/*                               Sign up                                  */
+/*------------------------------------------------------------------------*/
 router.post('/signUp', function(req, res) {
   const {name, email, password} = req.body;
 
@@ -45,8 +47,9 @@ router.post('/signUp', function(req, res) {
     }
   })
 })
-
-/*Sign in*/
+/*------------------------------------------------------------------------*/
+/*                               Sign in                                  */
+/*------------------------------------------------------------------------*/
 router.post('/signIn', function(req, res) {
   const {name, password} = req.body;
 
@@ -82,7 +85,19 @@ User.findOne({name}).then((data) => {
 });
 
 
-/*Ajouter todo */
+/*------------------------------------------------------------------------*/
+/*                              Get todos                                 */
+/*------------------------------------------------------------------------*/
+router.get("/get/:token", async function(req, res) {
+  const {token} = req.params;
+  await User.findOne({ token }).then((data) => {
+    res.json({toDo: data.toDos})
+  })
+})
+
+/*------------------------------------------------------------------------*/
+/*                             Ajouter todo                               */
+/*------------------------------------------------------------------------*/
 router.post("/add/:token", async function (req, res) {
   const {token} = req.params;
   const { task, priority } = req.body;
@@ -94,14 +109,34 @@ router.post("/add/:token", async function (req, res) {
   }
 
  user.toDos.push({
-    task: task,
-    priority: priority,
-    done: false,
-  });
+   id: uid2(32),
+   task: task,
+   priority: priority,
+   done: false,
+ });
 
   await user.save();
   res.json({result: true});
 
 });
+
+/*------------------------------------------------------------------------*/
+/*                            Supprimer todo                              */
+/*------------------------------------------------------------------------*/
+router.post("/delete/:token", async function(req, res) {
+const {token} = req.params;
+const {id} = req.body;
+const user = await User.findOne({token});
+
+if(!user){
+  // If user is not found, send an error response
+  return res.status(404).json({ error: "User not found with the given token." });
+}
+
+user.toDos = user.toDos.filter(toDo => toDo.id !== id);
+
+await user.save();
+res.json({result: true});
+})
 
 module.exports = router;
