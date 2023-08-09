@@ -42,7 +42,7 @@ router.post('/signUp', function(req, res) {
       })
 
       newUser.save().then(() => {
-        res.json({result: true, token: newUser.token});
+        res.json({ result: true, token: newUser.token, name: newUser.name });
       })
     }
   })
@@ -91,8 +91,8 @@ User.findOne({name}).then((data) => {
 router.get("/get/:token", async function(req, res) {
   const {token} = req.params;
   await User.findOne({ token }).then((data) => {
-    res.json({toDo: data.toDos})
-    console.log(data.toDos)
+    res.json({ toDo: data.toDos });
+    //console.log(data.toDos)
   })
 })
 
@@ -115,6 +115,13 @@ router.post("/add/:token", async function (req, res) {
    priority: priority,
    done: false,
  });
+
+ /*new User({
+  id: uid2(32),
+  task: task,
+  priority: priority,
+  done: false
+})*/
 
   await user.save();
   res.json({result: true});
@@ -139,5 +146,43 @@ user.toDos = user.toDos.filter(toDo => toDo.id !== id);
 await user.save();
 res.json({result: true});
 })
+
+/*------------------------------------------------------------------------*/
+/*                          Marquer todo comme faite                      */
+/*------------------------------------------------------------------------*/
+router.post("/done/:token", async function(req, res) {
+const {token} = req.params;
+const {id} = req.body;
+const user = await User.findOneAndUpdate({token});
+
+const todoItem = user.toDos.find(item => item.id === id);
+if (!todoItem) {
+  return res.status(404).json({ message: `Task with id ${id} not found.` });
+}
+
+console.log(`before ${todoItem.done}` )
+
+if(todoItem.done === false){
+  todoItem.done = true
+} else if(todoItem.done === true){
+  todoItem.done = false;
+}
+await user.save().then((data) => {
+  console.log(data)
+}); // Save the changes to the user document
+
+console.log(`after ${todoItem.done}` )
+
+
+console.log(`Task with id ${id} is done: ${todoItem.done}`);
+
+res.status(200).json({ message: `Task with id ${id} is done: ${todoItem.done}` });
+})
+
+
+
+
+
+
 
 module.exports = router;

@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const todoSchema = mongoose.Schema({
- name: String,
- priority: Number,
- done: Boolean,
-// dateDue: Date,
+    id: String,
+    task: String,
+    priority: Number,
+    done: Boolean
 });
 
 const Todo = mongoose.model('todos', todoSchema);
